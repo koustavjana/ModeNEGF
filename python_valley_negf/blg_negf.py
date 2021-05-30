@@ -303,6 +303,41 @@ class blg_lead :
 
 		return ML, MR
 
+	def self_energy_RGF(self,E) :
+		H11, H12, H21, H22 = self.hamiltonian()
+		O = np.zeros(np.shape(H11))
+		beta_dag = np.block([[O, H12],[O, O]])
+		beta = np.block([[O, O],[H21, O]])
+		alpha = np.block([[H11, H12],[H21, H22]])
+
+		sz = np.shape(alpha)
+		sz = sz[0]
+		sub = np.shape(H11)
+		sub = sub[0]
+
+		eta = 1e-6
+
+		g1_prev = np.zeros(np.shape(alpha))
+		error = 100
+		while error > 1e-8 :
+			Gs = la.inv(complex(E,eta)*np.eye(sz)-alpha-(beta_dag@g1_prev@beta))
+			error = np.sum(np.sum(np.abs(Gs-g1_prev)))/np.sum(np.sum(np.abs(Gs)+np.abs(g1_prev)))
+			g1_prev = (Gs+g1_prev)*0.5
+
+		M1 = beta_dag@g1_prev@beta
+
+		g2_prev = np.zeros(np.shape(alpha))
+		error = 100
+		while error > 1e-8 :
+			Gs = la.inv(complex(E,eta)*np.eye(sz)-alpha-(beta@g2_prev@beta_dag))
+			error = np.sum(np.sum(np.abs(Gs-g2_prev)))/np.sum(np.sum(np.abs(Gs)+np.abs(g2_prev)))
+			g2_prev = (Gs+g2_prev)*0.5
+
+		M2 = beta@g2_prev@beta_dag
+
+		return M1[:sub,:sub], M2[-sub:,-sub:]
+
+
 	def self_energy_modes(self,E) :
 		Up1, Up2, Un1, Un2, wp, wn = self.subcolumn_modes(E)
 		H11, H12, H21, H22 = self.hamiltonian()
@@ -394,7 +429,9 @@ class blg_channel :
 		O = np.zeros(np.shape(H11))
 		beta_dag = np.block([[O, H12],[O, O]])
 		beta = np.block([[O, O],[H21, O]])
-		alpha = np.block([[H11+ML, H12],[H21, H22+MR]])
+		alpha = np.block([[H11, H12],[H21, H22]])
+		alphaL = np.block([[H11+ML, H12],[H21, H22]])
+		alphaR = np.block([[H11, H12],[H21, H22+MR]])
 
 		sub = np.shape(ML)
 		ch = np.shape(H)
@@ -405,9 +442,9 @@ class blg_channel :
 		
 		
 
-		HH = np.block([[alpha,np.zeros((ld,ch)),np.zeros((ld,ld))],
+		HH = np.block([[alphaL,np.zeros((ld,ch)),np.zeros((ld,ld))],
 			[np.zeros((ch,ld)),H,np.zeros((ch,ld))],
-			[np.zeros((ld,ld)),np.zeros((ld,ch)),alpha]])
+			[np.zeros((ld,ld)),np.zeros((ld,ch)),alphaR]])
 		
 		HH[:ld,ld:2*ld] = beta 
 		HH[ld:2*ld,:ld] = beta_dag
@@ -476,8 +513,8 @@ class blg_system :
 def site_eps_fn(name,x,y) :
 	return 0
 
-lead = blg_lead(2*sqrt(3))
+lead = blg_lead(20*sqrt(3))
 lead.plot_bandstructure(np.linspace(-pi,pi,100))
 
-syst = blg_system(1,2*sqrt(3),site_eps_fn)
+syst = blg_system(1,20*sqrt(3),site_eps_fn)
 print(syst.Rcurrent(0.1,1,0))
