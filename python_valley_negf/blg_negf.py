@@ -15,9 +15,9 @@ class blg_site :
 		
 		self.x = unit_x
 		if self.name == 'AU' :
-			self.y = unit_y - 1/sqrt(3)
-		elif self.name == 'BL' :
 			self.y = unit_y + 1/sqrt(3)
+		elif self.name == 'BL' :
+			self.y = unit_y - 1/sqrt(3)
 		else :
 			self.y = unit_y 
 
@@ -30,70 +30,50 @@ class blg_site :
 		return self.site_eps + param	
 	
 	def unit_cell_pos(self) :
-		return [self.unit_x,self.unit_y]
+		return np.array([self.unit_x,self.unit_y])
 
 	def hopping(self, site ,param) : # param[0] = t # param[1] = tL
-		if self.unit_cell_pos() == site.unit_cell_pos() : 
+		if abs(self.unit_x-site.unit_x) < 1e-7 and abs(self.unit_y-site.unit_y) < 1e-7 : 
 			if self.name == 'AU' and site.name == 'BU' :
 				return param[0]
-			elif self.name == 'BU' and site.name == 'AU' :
+			if self.name == 'BU' and site.name == 'AU' :
 				return param[0]
-			elif self.name == 'BU' and site.name == 'AL' :
+			if self.name == 'BU' and site.name == 'AL' :
 				return param[1]
-			elif self.name == 'AL' and site.name == 'BU' :
+			if self.name == 'AL' and site.name == 'BU' :
 				return param[1]
-			elif self.name == 'AL' and site.name == 'BL' :
+			if self.name == 'AL' and site.name == 'BL' :
 				return param[0]
-			elif self.name == 'BL' and site.name == 'AL' :
+			if self.name == 'BL' and site.name == 'AL' :
 				return param[0]
-			else :
-				return 0
-		elif self.unit_x == site.unit_x - 1/2 and self.unit_y == site.unit_y - sqrt(3)/2 : 
+		
+		if abs(self.unit_x-site.unit_x+1/2) < 1e-7 and abs(self.unit_y-site.unit_y+sqrt(3)/2) < 1e-7 :	
+		# if self.unit_x == site.unit_x - 1/2 and self.unit_y == site.unit_y - sqrt(3)/2 : 
 			if self.name == 'AU' and site.name == 'BU' :
 				return param[0]
-			elif self.name == 'BU' and site.name == 'AU' :
+			if self.name == 'AL' and site.name == 'BL' :
 				return param[0]
-			elif self.name == 'AL' and site.name == 'BL' :
+		if abs(self.unit_x-site.unit_x+1/2) < 1e-7 and abs(self.unit_y-site.unit_y-sqrt(3)/2) < 1e-7 :
+		# if self.unit_x == site.unit_x - 1/2 and self.unit_y == site.unit_y + sqrt(3)/2 :
+			if self.name == 'BU' and site.name == 'AU' :
 				return param[0]
-			elif self.name == 'BL' and site.name == 'AL' :
+			if self.name == 'BL' and site.name == 'AL' :
 				return param[0]
-			else :
-				return 0
-		elif self.unit_x == site.unit_x - 1/2 and self.unit_y == site.unit_y + sqrt(3)/2 :
+		if abs(self.unit_x-site.unit_x-1/2) < 1e-7 and abs(self.unit_y-site.unit_y-sqrt(3)/2) < 1e-7 :
+		# if self.unit_x == site.unit_x + 1/2 and self.unit_y == site.unit_y + sqrt(3)/2 :
+			if self.name == 'BU' and site.name == 'AU' :
+				return param[0]
+			if self.name == 'BL' and site.name == 'AL' :
+				return param[0]
+		
+		if abs(self.unit_x-site.unit_x-1/2) < 1e-7 and abs(self.unit_y-site.unit_y+sqrt(3)/2) < 1e-7 :
+		# if self.unit_x == site.unit_x + 1/2 and self.unit_y == site.unit_y - sqrt(3)/2 :
 			if self.name == 'AU' and site.name == 'BU' :
 				return param[0]
-			elif self.name == 'BU' and site.name == 'AU' :
+			if self.name == 'AL' and site.name == 'BL' :
 				return param[0]
-			elif self.name == 'AL' and site.name == 'BL' :
-				return param[0]
-			elif self.name == 'BL' and site.name == 'AL' :
-				return param[0]
-			else :
-				return 0
-		elif self.unit_x == site.unit_x + 1/2 and self.unit_y == site.unit_y + sqrt(3)/2 :
-			if self.name == 'AU' and site.name == 'BU' :
-				return param[0]
-			elif self.name == 'BU' and site.name == 'AU' :
-				return param[0]
-			elif self.name == 'AL' and site.name == 'BL' :
-				return param[0]
-			elif self.name == 'BL' and site.name == 'AL' :
-				return param[0]
-			else :
-				return 0
-		elif self.unit_x == site.unit_x + 1/2 and self.unit_y == site.unit_y - sqrt(3)/2 :
-			if self.name == 'AU' and site.name == 'BU' :
-				return param[0]
-			elif self.name == 'BU' and site.name == 'AU' :
-				return param[0]
-			elif self.name == 'AL' and site.name == 'BL' :
-				return param[0]
-			elif self.name == 'BL' and site.name == 'AL' :
-				return param[0]
-			else :
-				return 0
-		else :
-			return 0
+		
+		return 0
 
 
 class blg_unit_cell :
@@ -102,10 +82,10 @@ class blg_unit_cell :
 		self.y = y
 
 		self.sites = []
-		self.sites.append(blg_site('AU',x,y,site_eps_fn))
+		self.sites.append(blg_site('BL',x,y,site_eps_fn))
 		self.sites.append(blg_site('BU',x,y,site_eps_fn))
 		self.sites.append(blg_site('AL',x,y,site_eps_fn))
-		self.sites.append(blg_site('BL',x,y,site_eps_fn))
+		self.sites.append(blg_site('AU',x,y,site_eps_fn))
 	
 	def __str__(self) :
 		to_str = str(list(map(str ,self.sites)))
@@ -156,10 +136,10 @@ class blg_subcolumn2 :
 			y = i*sqrt(3)
 			self.unit_cells.append(blg_unit_cell(x, y, site_eps_fn))
 
-		self.unit_cells[0].remove('AU')
-		self.unit_cells[0].remove('AL')
-		self.unit_cells[self.num_unit_cells-1].remove('BU')
-		self.unit_cells[self.num_unit_cells-1].remove('BL')	
+		self.unit_cells[0].remove('BU')
+		self.unit_cells[0].remove('BL')
+		self.unit_cells[-1].remove('AU')
+		self.unit_cells[-1].remove('AL')	
 		self.sites = []
 		for i in range(self.num_unit_cells) :
 			self.sites = self.sites + self.unit_cells[i].sites
@@ -190,6 +170,7 @@ class blg_lead :
 		self.subcolumns.append(blg_subcolumn1(0,W,site_eps_fn))
 		self.subcolumns.append(blg_subcolumn2(0.5,W,site_eps_fn))
 		self.sites = self.subcolumns[0].sites + self.subcolumns[1].sites
+		self.debug = 0
 
 	def hamiltonian(self) :	
 		N = len(self.sites)
@@ -203,6 +184,7 @@ class blg_lead :
 					H[i,j] = self.sites[i].hopping(self.sites[j],[-1,-0.5])
 		
 		n = int(N/2)
+		self.debug = H
 		H11 = H[:n,:n]
 		H22 = H[n:,n:]
 		H12 = H[:n,n:]
@@ -494,5 +476,8 @@ class blg_system :
 def site_eps_fn(name,x,y) :
 	return 0
 
-lead = blg_lead(10*sqrt(3))
+lead = blg_lead(2*sqrt(3))
 lead.plot_bandstructure(np.linspace(-pi,pi,100))
+
+syst = blg_system(1,2*sqrt(3),site_eps_fn)
+print(syst.Rcurrent(0.1,1,0))
