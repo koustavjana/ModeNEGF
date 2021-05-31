@@ -100,12 +100,17 @@ class blg_unit_cell :
 
 class blg_subcolumn1 :
 	def __init__(self, x, W, site_eps_fn) :
-		self.num_unit_cells = int(W/sqrt(3))
+		self.num_unit_cells = int(W/sqrt(3)) + 1
 		
 		self.unit_cells = []
 		for i in range(self.num_unit_cells) :
-			y = i*sqrt(3) + sqrt(3)/2
+			y = (i-1)*sqrt(3) + sqrt(3)/2 
 			self.unit_cells.append(blg_unit_cell(x, y, site_eps_fn))
+
+		self.unit_cells[0].remove('BU')
+		self.unit_cells[0].remove('BL')
+		self.unit_cells[-1].remove('AU')
+		self.unit_cells[0].remove('AL')
 
 		self.sites = []
 		for i in range(self.num_unit_cells) :
@@ -133,13 +138,14 @@ class blg_subcolumn2 :
 		
 		self.unit_cells = []
 		for i in range(self.num_unit_cells) :
-			y = i*sqrt(3)
+			y = i*sqrt(3) 
 			self.unit_cells.append(blg_unit_cell(x, y, site_eps_fn))
 
-		self.unit_cells[0].remove('BU')
+		self.unit_cells[-1].remove('BU')
 		self.unit_cells[0].remove('BL')
 		self.unit_cells[-1].remove('AU')
 		self.unit_cells[-1].remove('AL')	
+		
 		self.sites = []
 		for i in range(self.num_unit_cells) :
 			self.sites = self.sites + self.unit_cells[i].sites
@@ -514,15 +520,18 @@ class blg_system :
 			
 
 W = 20*sqrt(3)
-def site_eps_fn_channel(name,x,y) :
-	variation = 0.2*tanh((y-W/2)/sqrt(3))
-	if name == 'AU' or name == 'BU' :
-		return variation
-	else :
-		return -variation
 
-def site_eps_fn_lead(name,x,y) :
-	return 0
+
+
+def dual_gate(gate,W,scale) :
+	W = W - 1/(2*sqrt(3))
+	variation = lambda y: gate*tanh((y+1/(2*sqrt(3))-W/2)/(sqrt(3)*scale))
+	return lambda name,x,y :  variation(y)*(2*(name == 'AU' or name == 'BU')-1)
+
+site_eps_fn_channel = dual_gate(0.2,W,1)
+
+site_eps_fn_lead = lambda name,x,y : 0
+
 
 lead = blg_lead(W,site_eps_fn_channel,1.6,0.8)
 lead.plot_bandstructure(np.linspace(-pi,pi,300))
