@@ -111,16 +111,16 @@ class blg_subcolumn1 :
 		for i in range(self.num_unit_cells) :
 			self.sites = self.sites + self.unit_cells[i].sites
 
-	def hamiltonian(self) :
+	def hamiltonian(self,U,t,tL) :
 		N = len(self.sites)
 		H = np.zeros((N,N))
 		
 		for i in range(N) :
 			for j in range(N) :
 				if i == j :
-					H[i,j] = self.sites[i].onsite(0) 		
+					H[i,j] = self.sites[i].onsite(U) 		
 				else :
-					H[i,j] = self.sites[i].hopping(self.sites[j],[-1,-0.5])
+					H[i,j] = self.sites[i].hopping(self.sites[j],[-t,-tL])
 
 		return H	
 
@@ -144,16 +144,16 @@ class blg_subcolumn2 :
 		for i in range(self.num_unit_cells) :
 			self.sites = self.sites + self.unit_cells[i].sites
 
-	def hamiltonian(self) :
+	def hamiltonian(self,U,t,tL) :
 		N = len(self.sites)
 		H = np.zeros((N,N))
 		
 		for i in range(N) :
 			for j in range(N) :
 				if i == j :
-					H[i,j] = self.sites[i].onsite(0) 		
+					H[i,j] = self.sites[i].onsite(U) 		
 				else :
-					H[i,j] = self.sites[i].hopping(self.sites[j],[-1,-0.5])
+					H[i,j] = self.sites[i].hopping(self.sites[j],[-t,-tL])
 
 		return H
 
@@ -161,10 +161,10 @@ class blg_subcolumn2 :
 
 
 class blg_lead :
-	def __init__(self, W) :
-		def site_eps_fn(name,x,y) :
-			return 0
-
+	def __init__(self, W, site_eps_fn,t,tL) :
+		
+		self.t = t
+		self.tL = tL
 		self.W = W	
 		self.subcolumns = []
 		self.subcolumns.append(blg_subcolumn1(0,W,site_eps_fn))
@@ -181,7 +181,7 @@ class blg_lead :
 				if i == j :
 					H[i,j] = self.sites[i].onsite(0) 		
 				else :
-					H[i,j] = self.sites[i].hopping(self.sites[j],[-1,-0.5])
+					H[i,j] = self.sites[i].hopping(self.sites[j],[-self.t,-self.tL])
 		
 		n = int(N/2)
 		self.debug = H
@@ -393,7 +393,10 @@ class blg_lead :
 
 
 class blg_channel :
-	def __init__(self, L, W, site_eps_fn) :
+	def __init__(self, L, W, site_eps_fn,U,t,tL) :
+		self.U = U
+		self.t = t
+		self.tL = tL
 		self.num_columns = int(L)
 		self.W = W
 		self.subcolumns = []
@@ -412,9 +415,9 @@ class blg_channel :
 		for i in range(N) :
 			for j in range(N) :
 				if i == j :
-					H[i,j] = self.sites[i].onsite(0) 		
+					H[i,j] = self.sites[i].onsite(self.U) 		
 				else :
-					H[i,j] = self.sites[i].hopping(self.sites[j],[-1,-0.5])
+					H[i,j] = self.sites[i].hopping(self.sites[j],[-self.t,-self.tL])
 
 		return H
 
@@ -471,9 +474,9 @@ class blg_channel :
 
 
 class blg_system :
-	def __init__(self,L,W,site_eps_fn) :
-		self.channel = blg_channel(L,W,site_eps_fn)
-		self.lead = blg_lead(W)
+	def __init__(self,L,W,site_eps_fn_channel,site_eps_fn_lead,U,t,tL) :
+		self.channel = blg_channel(L,W,site_eps_fn_channel,U,t,tL)
+		self.lead = blg_lead(W,site_eps_fn_lead,t,tL)
 
 	def Rcurrent(self,E,fL,fR) :
 		GR, GA, A, Gn, Gp, TL, TR = self.channel.green_fun(self.lead,E,fL,fR)
@@ -513,8 +516,8 @@ class blg_system :
 def site_eps_fn(name,x,y) :
 	return 0
 
-lead = blg_lead(20*sqrt(3))
+lead = blg_lead(20*sqrt(3),site_eps_fn,1,0.5)
 lead.plot_bandstructure(np.linspace(-pi,pi,100))
 
-syst = blg_system(1,20*sqrt(3),site_eps_fn)
+syst = blg_system(1,20*sqrt(3),site_eps_fn,site_eps_fn,0,1,0.5)
 print(syst.Rcurrent(0.1,1,0))
