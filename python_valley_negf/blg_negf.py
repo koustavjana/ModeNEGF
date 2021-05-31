@@ -1,4 +1,4 @@
-from math import pi, sqrt
+from math import pi, sqrt, tanh
 from cmath import exp
 from matplotlib import pyplot as plt
 import numpy.linalg as la
@@ -513,11 +513,19 @@ class blg_system :
 
 			
 
-def site_eps_fn(name,x,y) :
+W = 20*sqrt(3)
+def site_eps_fn_channel(name,x,y) :
+	variation = 0.2*tanh((y-W/2)/sqrt(3))
+	if name == 'AU' or name == 'BU' :
+		return variation
+	else :
+		return -variation
+
+def site_eps_fn_lead(name,x,y) :
 	return 0
 
-lead = blg_lead(20*sqrt(3),site_eps_fn,1,0.5)
-lead.plot_bandstructure(np.linspace(-pi,pi,100))
+lead = blg_lead(W,site_eps_fn_channel,1.6,0.8)
+lead.plot_bandstructure(np.linspace(-pi,pi,300))
 
-syst = blg_system(1,20*sqrt(3),site_eps_fn,site_eps_fn,0,1,0.5)
-print(syst.Rcurrent(0.1,1,0))
+syst = blg_system(10,W,site_eps_fn_channel,site_eps_fn_lead,0.5,1.6,0.8)
+print(syst.Rcurrent(0.5,1,0))
