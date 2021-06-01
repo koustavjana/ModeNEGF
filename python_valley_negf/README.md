@@ -1,1 +1,1 @@
-Edge states spoil valley polarization
+Edge states spoil valley polarization in BLG
