@@ -421,7 +421,10 @@ class blg_channel :
 		for i in range(N) :
 			for j in range(N) :
 				if i == j :
-					H[i,j] = self.sites[i].onsite(self.U) 		
+					H[i,j] = self.sites[i].onsite(self.U)
+					if self.sites[i].y <= 2*sqrt(3) or self.sites[i].y >= self.W-2*sqrt(3) :
+						H[i,j] = H[i,j] + 5*(2*np.random.random_sample()-1) 
+
 				else :
 					H[i,j] = self.sites[i].hopping(self.sites[j],[-self.t,-self.tL])
 
@@ -498,7 +501,7 @@ class blg_system :
 		IR_kp = np.trace((1-fR)*TRout_kp@Gn[-sub:,-sub:]-fR*TRin_kp@Gp[-sub:,-sub:])
 		IR_kn = np.trace((1-fR)*TRout_kn@Gn[-sub:,-sub:]-fR*TRin_kn@Gp[-sub:,-sub:])
 
-		return IR_kp, IR_kn, np.trace(TR@GR@TL@GA)		
+		return IR_kp, IR_kn, np.trace(TR[-sub:,-sub:]@GR[-sub:,:sub]@TL[:sub,:sub]@GA[:sub,-sub:])		
 
 	def Lcurrent(self,E,fL,fR) :
 		GR, GA, A, Gn, Gp, TL, TR = self.channel.green_fun(self.lead,E,fL,fR)
@@ -514,7 +517,7 @@ class blg_system :
 		IL_kp = np.trace((1-fL)*TLout_kp@Gn[:sub,:sub]-fL*TLin_kp@Gp[:sub,:sub])
 		IL_kn = np.trace((1-fL)*TLout_kn@Gn[:sub,:sub]-fL*TLin_kn@Gp[:sub,:sub])
 
-		return IL_kp, IL_kn, np.trace(TL@GR@TR@GA)	
+		return IL_kp, IL_kn, np.trace(TL[:sub,:sub]@GR[:sub,-sub:]@TR[-sub:,-sub:]@GA[-sub:,:sub])	
 
 
 			
@@ -536,5 +539,5 @@ site_eps_fn_lead = lambda name,x,y : 0
 lead = blg_lead(W,site_eps_fn_channel,1.6,0.8)
 lead.plot_bandstructure(np.linspace(-pi,pi,300))
 
-syst = blg_system(10,W,site_eps_fn_channel,site_eps_fn_lead,0.5,1.6,0.8)
+syst = blg_system(20,W,site_eps_fn_channel,site_eps_fn_lead,0.5,1.6,0.8)
 print(syst.Rcurrent(0.5,1,0))

@@ -494,7 +494,7 @@ class silicene_system :
 
 			
 
-W = 10*sqrt(3)
+W = 20*sqrt(3)
 
 
 
@@ -511,5 +511,5 @@ site_eps_fn_lead = lambda name,x,y : 0
 lead = silicene_lead(W,site_eps_fn_channel,1.6)
 lead.plot_bandstructure(np.linspace(-pi,pi,300))
 
-syst = silicene_system(20,W,site_eps_fn_channel,site_eps_fn_lead,0.69,1.6)
+syst = silicene_system(20,W,site_eps_fn_channel,site_eps_fn_lead,0.5,1.6)
 print(syst.Rcurrent(0.5,1,0))
