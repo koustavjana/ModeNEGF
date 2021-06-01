@@ -473,7 +473,7 @@ class silicene_system :
 		IR_kp = np.trace((1-fR)*TRout_kp@Gn[-sub:,-sub:]-fR*TRin_kp@Gp[-sub:,-sub:])
 		IR_kn = np.trace((1-fR)*TRout_kn@Gn[-sub:,-sub:]-fR*TRin_kn@Gp[-sub:,-sub:])
 
-		return IR_kp, IR_kn, np.trace(TR@GR@TL@GA)		
+		return IR_kp, IR_kn, np.trace(TR[-sub:,-sub:]@GR[-sub:,:sub]@TL[:sub,:sub]@GA[:sub,-sub:])		
 
 	def Lcurrent(self,E,fL,fR) :
 		GR, GA, A, Gn, Gp, TL, TR = self.channel.green_fun(self.lead,E,fL,fR)
@@ -489,7 +489,7 @@ class silicene_system :
 		IL_kp = np.trace((1-fL)*TLout_kp@Gn[:sub,:sub]-fL*TLin_kp@Gp[:sub,:sub])
 		IL_kn = np.trace((1-fL)*TLout_kn@Gn[:sub,:sub]-fL*TLin_kn@Gp[:sub,:sub])
 
-		return IL_kp, IL_kn, np.trace(TL@GR@TR@GA)	
+		return IL_kp, IL_kn, np.trace(TL[:sub,:sub]@GR[:sub,-sub:]@TR[-sub:,-sub:]@GA[-sub:,:sub])	
 
 
 			
