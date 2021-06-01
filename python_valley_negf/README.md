@@ -1,1 +1,1 @@
-Edge states spoil valley polarization in BLG
+Edge states suppressed in BLG by strong disorder at the edges
